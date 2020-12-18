@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:get_app/controllers/controller.dart';
 import 'package:get_app/models/friend.dart';
+import 'package:get_app/models/message.dart';
 import 'package:get_app/models/user.dart';
 import 'package:get_app/models/user_position.dart';
 import 'package:get_app/models/user_state.dart';
@@ -89,7 +90,7 @@ Future<QuerySnapshot> getAllUsers(String userId) {
       .get();
 }
 
-getAllMessages(
+Stream<List<MessageModel>>getAllMessages(
   String chatRoomId,
 ) {
   FirebaseFirestore.instance
@@ -98,11 +99,11 @@ getAllMessages(
       .collection('messages')
       .snapshots()
       .map((QuerySnapshot query) {
-    List<FriendModel> usersList = List<FriendModel>();
+    List<MessageModel> messagesList = List<MessageModel>();
     query.docs.map((e) {
-      usersList.add(FriendModel.fromQueryDocumentSnapshot(e));
+      messagesList.add(MessageModel.fromQueryDocumentSnapshot(e));
     }).toList();
-    return usersList;
+    return messagesList;
   });
 }
 

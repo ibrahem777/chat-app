@@ -7,6 +7,7 @@ import '../helpers/firebase_helper.dart';
 class ChatRoomController extends GetxController {
   RxList<MessageModel> messages=RxList<MessageModel>();
   String chatRoomId;
+  var isSent=false.obs;
   ChatRoomController({@required this.chatRoomId});
   @override
   void onInit() {
