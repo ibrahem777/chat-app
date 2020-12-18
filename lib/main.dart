@@ -1,87 +1,72 @@
-import 'package:auth_app/models/doctor.dart';
-import 'package:auth_app/providers/appointment_provider.dart';
-import 'package:auth_app/providers/auth.dart';
-import 'package:auth_app/providers/dates_schedule.dart';
-import 'package:auth_app/providers/doctors.dart';
-import 'package:auth_app/providers/user_provider.dart';
-import 'package:auth_app/screens/feedback_screen.dart';
-import 'package:auth_app/screens/home_page.dart';
-import 'package:auth_app/screens/splash_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_windowmanager/flutter_windowmanager.dart';
+import 'package:get/get.dart';
+import 'package:get_app/get.dart';
+import 'package:get_app/screens/auth_screen.dart';
+import 'package:get_app/screens/location.dart';
+import 'package:get_app/screens/users_listview.dart';
+
+import 'controllers/user_state_controller.dart';
 
 void main() {
-  
   runApp(MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-     //  ChangeNotifierProvider.value(value: Auth()),
-        ChangeNotifierProvider.value(
-          value: AppointmentProvider(),
-        ),
-        ChangeNotifierProvider.value(
-          value: Doctors(),
-        ),
-         ChangeNotifierProvider.value(
-          value: DatesSchedule(),
-        ),
-        
-      ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-        
-          backgroundColor: Colors.grey[200],
-          buttonTheme: ButtonTheme.of(context).copyWith(
-            buttonColor: Colors.blue[600],
-            textTheme: ButtonTextTheme.primary,
-          ),
-        ),
-       // home: MyHomePage(),
-       initialRoute: '/',
-        routes: {
-          '/':(context)=>MyHomePage(),
-          FeedbackScreen.routeName:(context)=>FeedbackScreen(),
-          HomePage.routeName:(context)=>HomePage(),
-        },
-      ),
+    return GetMaterialApp(
+      title: 'Flutter Demo',
+     
+      home: MyHomePage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
+class MyHomePage extends StatelessWidget  {
+   
+    final Future<FirebaseApp> _initialization = Firebase.initializeApp();
 
-class _MyHomePageState extends State<MyHomePage> {
- // Future<bool> user;
-
+ 
   @override
   Widget build(BuildContext context) {
     
+    return FutureBuilder(
+      // Initialize FlutterFire:
+      future: _initialization,
+      builder: (context, snapshot) {
+        // Check for errors
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('error '),
+          );
+        }
 
-     
-            return StreamBuilder(stream: FirebaseAuth.instance.onAuthStateChanged,builder: (ctx,userSnapshot){
+        // Once complete, show your application
+        if (snapshot.connectionState == ConnectionState.done) {
+ 
+          return
+         
+          StreamBuilder<User>(stream: FirebaseAuth.instance.authStateChanges(), builder: (context,snapshot){
+if(snapshot.hasData){
+  return UsersListViewScreen();
+}
+else{
+  return AuthScreen();
+}
+          });
+          //FirebaseAuth.instance.currentUser==null? AuthScreen():UsersListViewScreen();
+        }
 
-              if(userSnapshot.hasData){
-                return HomePage();
-              }
-              else{
-                return SplashScreen();
-              }
-            });
-        
-    
+        // Otherwise, show something whilst waiting for initialization to complete
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+  
   }
 }
